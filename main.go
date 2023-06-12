@@ -1,8 +1,8 @@
 package main
 
 import (
-	"bankai/app"
 	"log"
+	"ticket/app"
 )
 
 func main() {

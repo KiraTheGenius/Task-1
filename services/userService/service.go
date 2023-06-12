@@ -1,9 +1,8 @@
 package userService
 
 import (
-	"bankai/models"
-	"bankai/repository/userRepository"
-	"bankai/utils"
+	"ticket/models"
+	"ticket/repository/userRepository"
 )
 
 type UserService interface {

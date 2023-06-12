@@ -1,10 +1,10 @@
 package userRepository
 
 import (
-	"bankai/models"
 	"errors"
 	"fmt"
 	"os"
+	"ticket/models"
 
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
