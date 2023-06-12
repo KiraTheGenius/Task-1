@@ -1,11 +1,11 @@
 package usercontroller
 
 import (
-	"bankai/models"
-	"bankai/services/userService"
-	"bankai/utils"
 	"fmt"
 	"net/http"
+	"ticket/models"
+	"ticket/services/userService"
+	"ticket/utils"
 	"time"
 
 	"github.com/golang-jwt/jwt"

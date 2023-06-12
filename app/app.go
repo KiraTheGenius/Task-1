@@ -1,11 +1,9 @@
 package app
 
 import (
-	"bankai/controllers/usercontroller"
-	"bankai/repository/userRepository"
-	"bankai/services/userService"
-
-	"bankai/middlewares"
+	"ticket/controllers/usercontroller"
+	"ticket/repository/userRepository"
+	"ticket/services/userService"
 
 	_ "github.com/jinzhu/gorm/dialects/postgres"
 	"github.com/labstack/echo"
