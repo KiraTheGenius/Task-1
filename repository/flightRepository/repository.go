@@ -3,11 +3,9 @@ package flightRepository
 import (
 	"errors"
 	"fmt"
-	"os"
 	"ticket/models"
 	"time"
 
-	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 )
 
@@ -92,33 +90,4 @@ func (fl *flightGormRepository) GetDaysList() ([]string, error) {
 	}
 	return days, nil
 
-}
-
-func getDbConnection() *gorm.DB {
-	// Replace the values below with your actual MySQL database credentials
-	dbURI := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8mb4&parseTime=True&loc=Local",
-		os.Getenv("DB_USER"), os.Getenv("DB_PASSWORD"), os.Getenv("DB_HOST"), os.Getenv("DB_PORT"), os.Getenv("DB_NAME"))
-	fmt.Println(dbURI)
-	// Connect to the database
-	db, err := gorm.Open(mysql.Open(dbURI), &gorm.Config{})
-	if err != nil {
-		panic(err)
-	}
-
-	// Set up connection pool and other configuration options
-	sqlDb, err := db.DB()
-	if err != nil {
-		panic(err)
-	}
-	sqlDb.SetMaxOpenConns(100)
-	sqlDb.SetMaxIdleConns(10)
-
-	// Migrate the Flight model to the database (if necessary)
-	err = db.AutoMigrate(&models.Flight{})
-	if err != nil {
-		panic(err)
-	}
-
-	// Use the db instance to interact with the database in your application
-	return db
 }
