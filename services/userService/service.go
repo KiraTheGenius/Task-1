@@ -3,6 +3,7 @@ package userService
 import (
 	"ticket/models"
 	"ticket/repository/userRepository"
+	"ticket/utils"
 )
 
 type UserService interface {

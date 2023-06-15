@@ -6,7 +6,7 @@ import (
 	"os"
 	"ticket/models"
 
-	"gorm.io/driver/postgres"
+	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 )
 
@@ -62,7 +62,7 @@ func getDbConnection() *gorm.DB {
 		os.Getenv("DB_HOST"), os.Getenv("DB_PORT"), os.Getenv("DB_USER"), os.Getenv("DB_NAME"), os.Getenv("DB_PASSWORD"))
 	fmt.Println(dbURI)
 	// Connect to the database
-	db, err := gorm.Open(postgres.Open(dbURI))
+	db, err := gorm.Open(mysql.Open(dbURI))
 	if err != nil {
 		panic(err)
 	}

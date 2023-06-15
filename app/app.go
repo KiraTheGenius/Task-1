@@ -1,12 +1,15 @@
 package app
 
 import (
+	"ticket/controllers/flightcontroller"
 	"ticket/controllers/usercontroller"
+	"ticket/repository/flightRepository"
 	"ticket/repository/userRepository"
+	"ticket/services/flightService"
 	"ticket/services/userService"
 
-	_ "github.com/jinzhu/gorm/dialects/postgres"
 	"github.com/labstack/echo"
+	_ "gorm.io/driver/mysql"
 )
 
 type App struct {
@@ -28,12 +31,20 @@ func (a *App) Start(addr string) error {
 
 func routing(e *echo.Echo) {
 	userRepo := userRepository.NewGormUserRepository()
+	flightRepo := flightRepository.NewGormFlightRepository()
 	UserService := userService.NewUserService(userRepo)
+	FlightService := flightService.NewFlightService(flightRepo)
 	UserController := usercontroller.UserController{UserService: UserService}
-	// public routing
+	FlightController := flightcontroller.FlightController{FlightService: FlightService}
+
+	// Public routes
+	e.GET("/flights/:id", FlightController.GetFlightByID)
+	e.GET("/flights/:origin/:destination/:date", FlightController.GetFlightByDate)
+	e.GET("/flights/planes", FlightController.GetPlanesList)
+	e.GET("/flights/cities", FlightController.GetCitiesList)
+	e.GET("/flights/days", FlightController.GetDaysList)
+
+	// Signup and login routes
 	e.POST("/signup", UserController.Signup)
 	e.POST("/login", UserController.Login)
-	e.POST("/token", UserController.GetToken)
-	// protected routing
-	e.GET("/now", UserController.GetTime, middlewares.IsLoggedIn, middlewares.IsAdmin)
 }
