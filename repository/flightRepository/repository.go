@@ -11,7 +11,7 @@ import (
 
 type FlightRepository interface {
 	GetFlightsByCityAndDate(origin string, destination string, day time.Time) ([]*models.Flight, error)
-	GetFlightByID(ID uint) (*models.Flight, error)
+	GetFlightByID(ID int64) (*models.Flight, error)
 	GetPlanesList() ([]string, error)
 	GetCitiesList() ([]string, error)
 	GetDaysList() ([]string, error)
@@ -39,7 +39,7 @@ func (fl *flightGormRepository) GetFlightsByCityAndDate(origin string, destinati
 	return flights, nil
 }
 
-func (fl *flightGormRepository) GetFlightByID(ID uint) (*models.Flight, error) {
+func (fl *flightGormRepository) GetFlightByID(ID int64) (*models.Flight, error) {
 	var flight models.Flight
 	result := fl.db.First(&flight, ID)
 	if errors.Is(result.Error, gorm.ErrRecordNotFound) {

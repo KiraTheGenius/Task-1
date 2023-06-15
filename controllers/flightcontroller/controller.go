@@ -18,7 +18,7 @@ func (f *FlightController) GetFlightByID(c echo.Context) error {
 	if err != nil {
 		return c.String(http.StatusBadRequest, "Invalid ID")
 	}
-	result, err := f.FlightService.GetFlight(uint(id))
+	result, err := f.FlightService.GetFlight(int64(id))
 	if err != nil {
 		return c.String(http.StatusNotFound, "Flight Not Found!!")
 

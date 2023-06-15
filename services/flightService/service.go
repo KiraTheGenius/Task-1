@@ -13,7 +13,7 @@ func NewFlightService(flightRepo flightRepository.FlightRepository) FlightServic
 }
 
 type FlightService interface {
-	GetFlight(id uint) (*models.Flight, error)
+	GetFlight(id int64) (*models.Flight, error)
 	GetFlightByDate(origin string, destination string, day time.Time) ([]*models.Flight, error)
 	GetPlanesList() ([]string, error)
 	GetCitiesList() ([]string, error)
@@ -24,7 +24,7 @@ type flightService struct {
 	flightRepository flightRepository.FlightRepository
 }
 
-func (s *flightService) GetFlight(id uint) (*models.Flight, error) {
+func (s *flightService) GetFlight(id int64) (*models.Flight, error) {
 	return s.flightRepository.GetFlightByID(id)
 }
 
