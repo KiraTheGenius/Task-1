@@ -10,11 +10,13 @@ import (
 )
 
 type FlightRepository interface {
-	GetFlightsByCityAndDate(origin string, destination string, day time.Time) ([]*models.Flight, error)
-	GetFlightByID(ID int64) (*models.Flight, error)
+	GetFlightsByCityAndDate(origin string, destination string, day time.Time) ([]models.Flight, error)
+	GetFlightByID(id int64) (*models.Flight, error)
 	GetPlanesList() ([]string, error)
 	GetCitiesList() ([]string, error)
 	GetDaysList() ([]string, error)
+	ReserveFlightCapacity(id int64) (*models.Flight, error)
+	ReturnFlightCapacity(id int64) (*models.Flight, error)
 }
 
 type flightGormRepository struct {
@@ -27,9 +29,9 @@ func NewGormFlightRepository() FlightRepository {
 	}
 }
 
-func (fl *flightGormRepository) GetFlightsByCityAndDate(origin string, destination string, day time.Time) ([]*models.Flight, error) {
-	var flights []*models.Flight
-	result := fl.db.Where("origin = ? and destination = ? and date(day) = ?", origin, destination, day).Find(&flights)
+func (fl *flightGormRepository) GetFlightsByCityAndDate(origin string, destination string, day time.Time) ([]models.Flight, error) {
+	var flights []models.Flight
+	result := fl.db.Where("origin = ? and destination = ? and date(start_time) = date(?)", origin, destination, day).Find(&flights)
 	if err := result.Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, fmt.Errorf("no flights not found")
@@ -39,9 +41,9 @@ func (fl *flightGormRepository) GetFlightsByCityAndDate(origin string, destinati
 	return flights, nil
 }
 
-func (fl *flightGormRepository) GetFlightByID(ID int64) (*models.Flight, error) {
+func (fl *flightGormRepository) GetFlightByID(id int64) (*models.Flight, error) {
 	var flight models.Flight
-	result := fl.db.First(&flight, ID)
+	result := fl.db.First(&flight, id)
 	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
 		return nil, fmt.Errorf("flight not found")
 	}
@@ -53,7 +55,7 @@ func (fl *flightGormRepository) GetFlightByID(ID int64) (*models.Flight, error) 
 
 func (fl *flightGormRepository) GetPlanesList() ([]string, error) {
 	var planes []string
-	result := fl.db.Model(&models.Flight{}).Distinct("aircraft").Pluck("aircraft", &planes) // pluck Retrieves only aircraft column
+	result := fl.db.Model(&models.Flight{}).Distinct("aircraft").Pluck("aircraft", &planes)
 	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
 		return nil, fmt.Errorf("planes not found")
 	}
@@ -64,30 +66,80 @@ func (fl *flightGormRepository) GetPlanesList() ([]string, error) {
 }
 
 func (fl *flightGormRepository) GetCitiesList() ([]string, error) {
-	var cities []string
-	result := fl.db.Model(&models.Flight{}).Distinct("origin", "destination").Pluck("origin", &cities)
+	var origin, destination []string
+	result := fl.db.Model(&models.Flight{}).Distinct("origin").Pluck("origin", &origin)
 	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
-		return nil, fmt.Errorf("no cities found")
+		return nil, fmt.Errorf("planes not found")
+	}
+	result = fl.db.Model(&models.Flight{}).Distinct("destination").Pluck("destination", &destination)
+	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+		return nil, fmt.Errorf("planes not found")
 	}
 	if result.Error != nil {
 		return nil, result.Error
 	}
-	result = fl.db.Model(&models.Flight{}).Distinct("origin", "destination").Pluck("destination", &cities)
-	if result.Error != nil && !errors.Is(result.Error, gorm.ErrRecordNotFound) {
-		return nil, result.Error
-	}
+	cities := append(origin, destination...)
+	cities = removeDuplicateString(cities)
+
 	return cities, nil
 }
 
 func (fl *flightGormRepository) GetDaysList() ([]string, error) {
-	var days []string
-	result := fl.db.Model(&models.Flight{}).Distinct("date(startTime)").Pluck("date(startTime)", &days)
+	var startdate, enddate []string
+	result := fl.db.Model(&models.Flight{}).Distinct("start_time").Pluck("start_time", &startdate)
 	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
-		return nil, fmt.Errorf("flights not found")
+		return nil, fmt.Errorf("date not found")
+	}
+	result = fl.db.Model(&models.Flight{}).Distinct("end_time").Pluck("end_time", &enddate)
+	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+		return nil, fmt.Errorf("date not found")
 	}
 	if result.Error != nil {
 		return nil, result.Error
 	}
-	return days, nil
+	dates := append(startdate, enddate...)
+	dates = removeDuplicateString(dates)
 
+	return dates, nil
+}
+
+func (fl *flightGormRepository) ReserveFlightCapacity(id int64) (*models.Flight, error) {
+	flight, err := fl.GetFlightByID(id)
+	if err != nil {
+		return nil, err
+	}
+
+	*flight.Capacity--
+	if err := fl.db.Save(&flight).Error; err != nil {
+		return nil, err
+	}
+
+	return flight, nil
+}
+
+func (fl *flightGormRepository) ReturnFlightCapacity(id int64) (*models.Flight, error) {
+	flight, err := fl.GetFlightByID(id)
+	if err != nil {
+		return nil, err
+	}
+
+	*flight.Capacity++
+	if err := fl.db.Save(&flight).Error; err != nil {
+		return nil, err
+	}
+
+	return flight, nil
+}
+
+func removeDuplicateString(strSlice []string) []string {
+	// map to store unique keys
+	keys := make(map[string]bool)
+	returnSlice := []string{}
+	for _, item := range strSlice {
+		if _, value := keys[item]; !value {
+			keys[item] = true
+			returnSlice = append(returnSlice, item)
+		}
+	}
+	return returnSlice
 }

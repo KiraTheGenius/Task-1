@@ -32,15 +32,14 @@ func (f *FlightController) GetFlightByDate(c echo.Context) error {
 	destination := c.Param("destination")
 	dateStr := c.Param("date")
 
-	date, err := time.Parse("2006-01-02", dateStr)
+	day, err := time.Parse("2006-01-02", dateStr)
 	if err != nil {
 		return c.String(http.StatusBadRequest, "Invalid date format")
 	}
 
-	result, err := f.FlightService.GetFlightByDate(origin, destination, date)
+	result, err := f.FlightService.GetFlightByDate(origin, destination, day)
 	if err != nil {
 		return c.String(http.StatusNotFound, "Flight Not Found!!")
-
 	}
 
 	return c.JSON(http.StatusOK, result)
@@ -69,6 +68,30 @@ func (f *FlightController) GetDaysList(c echo.Context) error {
 	if err != nil {
 		return c.String(http.StatusNotFound, "No Day Found!!")
 
+	}
+	return c.JSON(http.StatusOK, result)
+}
+
+func (f *FlightController) ReserveFlightCapacity(c echo.Context) error { // Reduce Capacity
+	id, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		return c.String(http.StatusBadRequest, "Invalid ID")
+	}
+	result, err := f.FlightService.ReserveFlightCapacity(int64(id))
+	if err != nil {
+		return c.String(http.StatusNotFound, "No Flight Found!")
+	}
+	return c.JSON(http.StatusOK, result)
+}
+
+func (f *FlightController) ReturnFlightCapacity(c echo.Context) error { // Increase Capacity
+	id, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		return c.String(http.StatusBadRequest, "Invalid ID")
+	}
+	result, err := f.FlightService.ReturnFlightCapacity(int64(id))
+	if err != nil {
+		return c.String(http.StatusNotFound, "No Flight Found!")
 	}
 	return c.JSON(http.StatusOK, result)
 }

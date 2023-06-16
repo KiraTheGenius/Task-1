@@ -14,10 +14,12 @@ func NewFlightService(flightRepo flightRepository.FlightRepository) FlightServic
 
 type FlightService interface {
 	GetFlight(id int64) (*models.Flight, error)
-	GetFlightByDate(origin string, destination string, day time.Time) ([]*models.Flight, error)
+	GetFlightByDate(origin string, destination string, day time.Time) ([]models.Flight, error)
 	GetPlanesList() ([]string, error)
 	GetCitiesList() ([]string, error)
 	GetDaysList() ([]string, error)
+	ReserveFlightCapacity(id int64) (*models.Flight, error)
+	ReturnFlightCapacity(id int64) (*models.Flight, error)
 }
 
 type flightService struct {
@@ -28,7 +30,7 @@ func (s *flightService) GetFlight(id int64) (*models.Flight, error) {
 	return s.flightRepository.GetFlightByID(id)
 }
 
-func (s *flightService) GetFlightByDate(origin string, destination string, day time.Time) ([]*models.Flight, error) {
+func (s *flightService) GetFlightByDate(origin string, destination string, day time.Time) ([]models.Flight, error) {
 	return s.flightRepository.GetFlightsByCityAndDate(origin, destination, day)
 }
 
@@ -42,4 +44,12 @@ func (s *flightService) GetCitiesList() ([]string, error) {
 
 func (s *flightService) GetDaysList() ([]string, error) {
 	return s.flightRepository.GetDaysList()
+}
+
+func (s *flightService) ReserveFlightCapacity(id int64) (*models.Flight, error) {
+	return s.flightRepository.ReserveFlightCapacity(id)
+}
+
+func (s *flightService) ReturnFlightCapacity(id int64) (*models.Flight, error) {
+	return s.flightRepository.ReturnFlightCapacity(id)
 }
