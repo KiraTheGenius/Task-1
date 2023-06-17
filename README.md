@@ -12,7 +12,9 @@ Complete, All task
 3- Implement an endpoint to get more information about each flight by specifying the flight number using the information obtained from Ticket 1.
 
 4- Add functionality to handle empty capacity of flights:
+
     -Modify the flight object to include empty capacity information.
+    
     -Implement an endpoint to send a "reserve" message to reduce the empty capacity of the flight.
     -Implement an endpoint to send a "return" message to increase the flight capacity again.
 
